@@ -128,7 +128,7 @@ sub   rsa3072 2024-02-19 [E]
 
 - Export the public gpg key:
 ```shell
-gpg -o gpg-key.pub -a --export <your.name@email.com>
+gpg -o gpg-key.pub -a --export patrick_oci@test_oci.com
 ```
 
 - Unzip the provider file downloaded previously for MacOS:
@@ -161,8 +161,13 @@ shasum -a 256 terraform-provider-oci_5.29.0_darwin_amd64.zip > terraform-provide
 Note that a file `terraform-provider-oci_5.29.0_darwin_SHA256SUMS` has been created 
 
 - Create a detached signature using a gpg key:
+```
+show your gpg keys
+gpg -k
+```
+- use the one to use the signing
 ```shell
-gpg -sb terraform-provider-oci_5.29.0_darwin_SHA256SUMS
+gpg  --default-key 121AD89CA07D84F400480621CB3AD3052843121E -sb terraform-provider-oci_5.29.0_darwin_SHA256SUMS
 ```
 
 Note that a file `terraform-provider-oci_5.29.0_darwin_SHA256SUMS.sig` has been created 
@@ -274,19 +279,19 @@ curl -sS \
 
 - Save your URLs for `shasums-upload` and `shasums-sig-upload`:
 ```
-     "shasums-upload": "https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6QmY0QWNxK25HcXFBT1ZWNzJDSGxFc3pFRmsrbG40QW9DR3htaHlQTnhhbHp1RUJWL0Jsb3MyanlEbGVlUmNEZ3UyemN5ZERJU0FkNnFBSjkwWWFzQVUrQjVhekhCVzdMSjU1QXBESzM1M3Q5UGc5NnRrTUZLbEhjYmpNcHEzdnVtS1EzRXVaZ1BnWHdaMTRKSDNmdDdIVmxiSFhaRWZwZGlVWnVvWjVHTEh1Z0xHdXBuR01nT01jSkc3blpwbEswcTROOTlSd3VRQU0ycTAzSnhZZk45Y2pBTGFXeGVabWRwY0s0MnQ5RnBFQVF2aTZZTFk4SWV6SFJIbW92OGZuYUVvRDBPRjBKQ2JwRk42c1JrSlAvaFdWdXd3cWFZV3RSUk1ENmJyOTlFbGs9",
-      "shasums-sig-upload": "https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6QTlBNTRVUDd2eXRlT0syeWZlNDBpZi9qdDlEdWxoN1lxdzhMc0JGcFE4cXFuNHhPanVZV1FZbzZESy9GWmQ3SFBuandOUVJ5eTFSOXhWZ3FjK1V4dHdGVjFGbDl1NHVYTzBMMzR6dnZZN0lXKzJ3LzRUdU9zYzZpbkZzOHBEZEM4czNDWEgwRXlTS3ZEb0ZTMys1V2FseGVHaVYwNHZHdFFwaGlYb2d6SWlRQThlUHcrRjFTRGM5Z0dEbWFpb0FldmNpd283MHFtQTNyVjBFUkp3WGduWXdtSEVnQVFZa3VBKytUeTVNV1p6cFFDSkRrSFg0MkxWVit0alpDd3E0Y3ZPZC90VnIvRVArUkF1cXhPU3lxOEIvd3pGOG8xbVFNZU44K3MraHlxaUUwT3ZIVA"
+      "shasums-upload": "https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6T2ZQYS81bmNDczdnSytFRDhrdmhFbFhIbUd5a0Q1b1didVZBVlloUUlFZ0UwVzYvaDZpMWRvckVWREcrRGNXVFRWZTh5bFdKU2pucjhRQ3dDM0RVNDZhZnc2WXJkOFlGK2lYeHRBamtYY3hmQkNjZVFZMTRaQ3QxK1M2UnYvSUptc3pPTGJ3SVc5TURRWUxBRWN1RXZCeFNQNWRHRUMxbTNTWWp2ai93WXdveTh2ZWlnVDhJS2NzSnl3T085ekpEUGV5a25mNUVaTGdTbE01dDZDWktLYW81QU9BRUtiNGlna2o0bElIYkFEajJ1RWVOb21mR1BhZVpteUp6OEZOVTcyamNLUjNCdGJvS1NJUENuZVVUYmsycmVhUzNZajQvb0VKT1lMczc4YVE9",
+      "shasums-sig-upload": "https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6bUtTK2tZM0Q1ZXVFN3lUMzlZaFJHclQ5aVlYQ0VOYWdnbnBxMnBTZlFnaUd4TTVGVFhqSlVvMzBsMWQyVFFZTFFIQVNBeEtFQ2ROMVRDbDd1dVViWnQvc2ZPSkJBdHl0clFmS0YyRExzYndOdnlyRzgzQWl5dnRoK3JEbE81dGdXOHpmay9ueERwZWZzZVI0UlVvRGxNRnhnM21PSVVwTnFmWDN4b05YOUc5d2dxa0lxNUR3aERmUVRmUDlKenFrUVE4NFNkWDJaWEMyYW9VTWVyY1FuOGYxVCt2c3k0UklUTzl0c1FkcTExRnh6cnUyU0ZQdEEvZlBKaEZWclVXN0Q2ekRJM0wvcTQ0R1pZdVJuSVB6aTBPMit4cG1HMklYUG9JNldsQkRCZU52dEdvSA"
    
 ```
 
 - Upload the `shasum` file to the URL:
 ```shell
-curl -T terraform-provider-oci_5.29.0_darwin_SHA256SUMS https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6QmY0QWNxK25HcXFBT1ZWNzJDSGxFc3pFRmsrbG40QW9DR3htaHlQTnhhbHp1RUJWL0Jsb3MyanlEbGVlUmNEZ3UyemN5ZERJU0FkNnFBSjkwWWFzQVUrQjVhekhCVzdMSjU1QXBESzM1M3Q5UGc5NnRrTUZLbEhjYmpNcHEzdnVtS1EzRXVaZ1BnWHdaMTRKSDNmdDdIVmxiSFhaRWZwZGlVWnVvWjVHTEh1Z0xHdXBuR01nT01jSkc3blpwbEswcTROOTlSd3VRQU0ycTAzSnhZZk45Y2pBTGFXeGVabWRwY0s0MnQ5RnBFQVF2aTZZTFk4SWV6SFJIbW92OGZuYUVvRDBPRjBKQ2JwRk42c1JrSlAvaFdWdXd3cWFZV3RSUk1ENmJyOTlFbGs9
+curl -T terraform-provider-oci_5.29.0_darwin_SHA256SUMS https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6T2ZQYS81bmNDczdnSytFRDhrdmhFbFhIbUd5a0Q1b1didVZBVlloUUlFZ0UwVzYvaDZpMWRvckVWREcrRGNXVFRWZTh5bFdKU2pucjhRQ3dDM0RVNDZhZnc2WXJkOFlGK2lYeHRBamtYY3hmQkNjZVFZMTRaQ3QxK1M2UnYvSUptc3pPTGJ3SVc5TURRWUxBRWN1RXZCeFNQNWRHRUMxbTNTWWp2ai93WXdveTh2ZWlnVDhJS2NzSnl3T085ekpEUGV5a25mNUVaTGdTbE01dDZDWktLYW81QU9BRUtiNGlna2o0bElIYkFEajJ1RWVOb21mR1BhZVpteUp6OEZOVTcyamNLUjNCdGJvS1NJUENuZVVUYmsycmVhUzNZajQvb0VKT1lMczc4YVE9
 ```
 
 - Upload the `shasum sig` file to the URL:
 ```shell
-curl -T terraform-provider-oci_5.29.0_darwin_SHA256SUMS.sig https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6QTlBNTRVUDd2eXRlT0syeWZlNDBpZi9qdDlEdWxoN1lxdzhMc0JGcFE4cXFuNHhPanVZV1FZbzZESy9GWmQ3SFBuandOUVJ5eTFSOXhWZ3FjK1V4dHdGVjFGbDl1NHVYTzBMMzR6dnZZN0lXKzJ3LzRUdU9zYzZpbkZzOHBEZEM4czNDWEgwRXlTS3ZEb0ZTMys1V2FseGVHaVYwNHZHdFFwaGlYb2d6SWlRQThlUHcrRjFTRGM5Z0dEbWFpb0FldmNpd283MHFtQTNyVjBFUkp3WGduWXdtSEVnQVFZa3VBKytUeTVNV1p6cFFDSkRrSFg0MkxWVit0alpDd3E0Y3ZPZC90VnIvRVArUkF1cXhPU3lxOEIvd3pGOG8xbVFNZU44K3MraHlxaUUwT3ZIVA
+curl -T terraform-provider-oci_5.29.0_darwin_SHA256SUMS.sig https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6bUtTK2tZM0Q1ZXVFN3lUMzlZaFJHclQ5aVlYQ0VOYWdnbnBxMnBTZlFnaUd4TTVGVFhqSlVvMzBsMWQyVFFZTFFIQVNBeEtFQ2ROMVRDbDd1dVViWnQvc2ZPSkJBdHl0clFmS0YyRExzYndOdnlyRzgzQWl5dnRoK3JEbE81dGdXOHpmay9ueERwZWZzZVI0UlVvRGxNRnhnM21PSVVwTnFmWDN4b05YOUc5d2dxa0lxNUR3aERmUVRmUDlKenFrUVE4NFNkWDJaWEMyYW9VTWVyY1FuOGYxVCt2c3k0UklUTzl0c1FkcTExRnh6cnUyU0ZQdEEvZlBKaEZWclVXN0Q2ekRJM0wvcTQ0R1pZdVJuSVB6aTBPMit4cG1HMklYUG9JNldsQkRCZU52dEdvSA
 ```
 
 - Create the payload file named `provider-version-payload-platform.json`:
@@ -316,18 +321,16 @@ curl -sS \
 
 - Save the value of the `provider-binary-upload` from the response:
 ```
-      "provider-binary-upload": "https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6T2pvQmdJaFRlNWRxY08yTmJTR2JZbmdvOC9pbXQwWHRnNFhveGtJYmFZZG5iZjJrZUp6WVJ6dHMzdUZxZG9iSWMvTm1UYTBIOXVWOCs5UVhGNnlJRlVGUVhOQWhERUpPdTd2VTRiU1haazhqQUxnSGorVlhVOFlmL2dOUS8wQjVWNGNyYmVPRjZLZjBsZWw1T0xmVHZ1QjhPbitSbVF1b00yUWNEamtWa1BZTUtyM3RkMnozNkRhTGhYSUhzZGZ2bVdwYmNkR0FmYTJreFh3enFZN1Bkcy9tTVZZRjd4dFVpTFVIVStIMEVmSzR1RENFdS83U0Z1b3hRL2pIRFE9PQ"
-    }
+      "provider-binary-upload": "https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6OTNwVU5aSloyamZMRDQyR2xrWk9qZUxCMm1NRFgrVmdUR2lhS1RIZGI1QzlyYXlvbGU1NlRGV0VPeG15SkxGY2F3akw5WnhMdXlZdlVYeXRzdUd5Qjhrc0xPNUdnaCs5MjhTenhUTDY4ZVRRRnkwaGV3ZEFvRlFHMkpIUS9ieTM5d3hvMXc5TVA5UmM1eDF4Q0FGYnh0RWkyZTNwK05sUUc3OGlibXJxQUxxRTJZSXpwWE9TdVY3bGJQRFJ4RnBPMjltSkpKbmV0SC9STTlPNjNMYTRmZVc1elFpWTJjNGhBdU9YRXZZbC8waEdJNUxnZlh1SnMzLzBmZGRsQWc9PQ"
     }
 ```
 
 - Upload the archived binary to the `provider-binary-upload` URL:
 ```shell
-curl -T terraform-provider-oci_5.29.0_darwin_amd64.zip https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6T2pvQmdJaFRlNWRxY08yTmJTR2JZbmdvOC9pbXQwWHRnNFhveGtJYmFZZG5iZjJrZUp6WVJ6dHMzdUZxZG9iSWMvTm1UYTBIOXVWOCs5UVhGNnlJRlVGUVhOQWhERUpPdTd2VTRiU1haazhqQUxnSGorVlhVOFlmL2dOUS8wQjVWNGNyYmVPRjZLZjBsZWw1T0xmVHZ1QjhPbitSbVF1b00yUWNEamtWa1BZTUtyM3RkMnozNkRhTGhYSUhzZGZ2bVdwYmNkR0FmYTJreFh3enFZN1Bkcy9tTVZZRjd4dFVpTFVIVStIMEVmSzR1RENFdS83U0Z1b3hRL2pIRFE9PQ
+curl -T terraform-provider-oci_5.29.0_darwin_amd64.zip https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6OTNwVU5aSloyamZMRDQyR2xrWk9qZUxCMm1NRFgrVmdUR2lhS1RIZGI1QzlyYXlvbGU1NlRGV0VPeG15SkxGY2F3akw5WnhMdXlZdlVYeXRzdUd5Qjhrc0xPNUdnaCs5MjhTenhUTDY4ZVRRRnkwaGV3ZEFvRlFHMkpIUS9ieTM5d3hvMXc5TVA5UmM1eDF4Q0FGYnh0RWkyZTNwK05sUUc3OGlibXJxQUxxRTJZSXpwWE9TdVY3bGJQRFJ4RnBPMjltSkpKbmV0SC9STTlPNjNMYTRmZVc1elFpWTJjNGhBdU9YRXZZbC8waEdJNUxnZlh1SnMzLzBmZGRsQWc9PQ
 ```
 
-- The `vra2` provider is now uploaded in the Terraform Cloud's private registry:
-![Vra2 TFC private registry](https://github.com/dlavric/private-provider-tfc/blob/main/pictures/private-registry-tfc-vra2.png)
+- The `oci` provider is now uploaded in the Terraform Cloud's private registry:
 
 ## Verify the private provider works 
 
