@@ -34,30 +34,29 @@ cd private-provider-tfc
 ```
 terraform {
   required_providers {
-    vra = {
-      source = "vmware/vra"
-      version = "0.7.1"
+    oci = {
+      source = "oracle/oci"
+      version = "5.29.0"
     }
   }
 }
 
-provider "vra" {
+provider "oci" {
   # Configuration options
 }
 ``` 
 
 - Download the provider files to a directory on your local machine:
 ```shell
-terraform providers mirror /Users/daniela/Downloads/private-provider-tfc
+terraform providers mirror ./
 
-- Mirroring vmware/vra...
-  - Selected v0.7.1 to meet constraints 0.7.1
+- Mirroring oracle/oci...
+  - Selected v5.29.0 to meet constraints 5.29.0
   - Downloading package for darwin_amd64...
   - Package authenticated: signed by a HashiCorp partner
 ```
 
-Observe that a new folder named `registry.terraform.io` has been created and it contains the `vra` provider.
-![Vra provider files](https://github.com/dlavric/private-provider-tfc/blob/main/pictures/vra-provider-folder.png)
+Observe that a new folder named `registry.terraform.io` has been created and it contains the `oci` provider.
 
 - Install the `jq` package:
 ```shell
@@ -71,7 +70,60 @@ brew install gnupg
 
 - Create a GPG keypair to sign the release using the RSA algorithm:
 ```shell
-gpg --full-generate-key
+ gpg --full-generate-key
+```
+output
+```
+gpg (GnuPG) 2.4.3; Copyright (C) 2023 g10 Code GmbH
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Please select what kind of key you want:
+   (1) RSA and RSA
+   (2) DSA and Elgamal
+   (3) DSA (sign only)
+   (4) RSA (sign only)
+   (9) ECC (sign and encrypt) *default*
+  (10) ECC (sign only)
+  (14) Existing key from card
+Your selection? 1
+RSA keys may be between 1024 and 4096 bits long.
+What keysize do you want? (3072) 
+Requested keysize is 3072 bits
+Please specify how long the key should be valid.
+         0 = key does not expire
+      <n>  = key expires in n days
+      <n>w = key expires in n weeks
+      <n>m = key expires in n months
+      <n>y = key expires in n years
+Key is valid for? (0) 
+Key does not expire at all
+Is this correct? (y/N) y
+
+GnuPG needs to construct a user ID to identify your key.
+
+Real name: patrick_oci
+Email address: patrick_oci@test_oci.com
+Comment: testing
+You selected this USER-ID:
+    "patrick_oci (testing) <patrick_oci@test_oci.com>"
+
+Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? O
+We need to generate a lot of random bytes. It is a good idea to perform
+some other action (type on the keyboard, move the mouse, utilize the
+disks) during the prime generation; this gives the random number
+generator a better chance to gain enough entropy.
+We need to generate a lot of random bytes. It is a good idea to perform
+some other action (type on the keyboard, move the mouse, utilize the
+disks) during the prime generation; this gives the random number
+generator a better chance to gain enough entropy.
+gpg: revocation certificate stored as '/Users/patrickmunne/.gnupg/openpgp-revocs.d/121AD89CA07D84F400480621CB3AD3052843121E.rev'
+public and secret key created and signed.
+
+pub   rsa3072 2024-02-19 [SC]
+      121AD89CA07D84F400480621CB3AD3052843121E
+uid                      patrick_oci (testing) <patrick_oci@test_oci.com>
+sub   rsa3072 2024-02-19 [E]
 ```
 
 - Export the public gpg key:
@@ -81,48 +133,48 @@ gpg -o gpg-key.pub -a --export <your.name@email.com>
 
 - Unzip the provider file downloaded previously for MacOS:
 ```shell
-cd registry.terraform.io/vmware/vra
+cd registry.terraform.io/oracle/oci
 
-unzip terraform-provider-vra_0.7.1_darwin_amd64.zip
+unzip terraform-provider-oci_5.29.0_darwin_amd64.zip
 ```
 
-- Rename the extracted binary with the name you want to define for your private provider `vra2`:
+- Rename the extracted binary with the name you want to define for your private provider `oci`:
 ```shell
-mv terraform-provider-vra_v0.7.1 /Users/daniela/Downloads/private-provider-tfc/terraform-provider-vra2_v0.7.1
+mv terraform-provider-oci_v5.29.0 ../../../
 ```
 
 - Go back to the parent directory:
 ```shell
-cd /Users/daniela/Downloads/private-provider-tfc
+cd ../../../
 ```
 
-- Create a zip file with the new provider `vra2` binary:
+- Create a zip file with the new provider `oci` binary:
 ```shell
-zip terraform-provider-vra2_0.7.1_darwin_amd64.zip terraform-provider-vra2_v0.7.1
+zip terraform-provider-oci_5.29.0_darwin_amd64.zip terraform-provider-oci_v5.29.0
 ```
 
 - Create a file with the shasums for the binaries of the new provider `vra2` and the version 0.7.1:
 ```shell
-shasum -a 256 terraform-provider-vra2_0.7.1_darwin_amd64.zip > terraform-provider-vra2_0.7.1_SHA256SUMS
+shasum -a 256 terraform-provider-oci_5.29.0_darwin_amd64.zip > terraform-provider-oci_5.29.0_darwin_SHA256SUMS
 ```
 
-Note that a file `terraform-provider-vra2_0.7.1_SHA256SUMS` has been created 
+Note that a file `terraform-provider-oci_5.29.0_darwin_SHA256SUMS` has been created 
 
 - Create a detached signature using a gpg key:
 ```shell
-gpg -sb terraform-provider-vra2_0.7.1_SHA256SUMS
+gpg -sb terraform-provider-oci_5.29.0_darwin_SHA256SUMS
 ```
 
-Note that a file `terraform-provider-vra2_0.7.1_SHA256SUMS.sig` has been created 
+Note that a file `terraform-provider-oci_5.29.0_darwin_SHA256SUMS.sig` has been created 
 
 ## Steps to publish the provider to the private registry of Terraform Cloud
 
 - Export your API token from Terraform Cloud as an environment variable:
 ```shell
-export TOKEN=ab....
+export TOKEN=0zGXzPqxHtbqUg.atlasv1.xxxxxxxx
 ```
 
-- Create the payload file named `gpg-key-payload.json` for the GPG key and generate your `ascii-armor` value with the following command (where your gpg key is in the file `gpg-key,pub):
+- Create the payload file named `gpg-key-payload.json` for the GPG key and generate your `ascii-armor` value with the following command (where your gpg key is in the file `gpg-key.pub):
 ```shell
 sed 's/$/\\n/g' gpg-key.pub | tr -d '\n\r'
 ```
@@ -147,53 +199,53 @@ curl -sS \
     --header "Content-Type: application/vnd.api+json" \
     --request POST \
     --data @gpg-key-payload.json \
-    https://app.terraform.io/api/registry/private/v2/gpg-keys | jq '.'
+    https://tfe67.aws.munnep.com/api/registry/private/v2/gpg-keys | jq '.'
 
 {
   "data": {
     "type": "gpg-keys",
-    "id": "726",
+    "id": "4",
     "attributes": {
-      "ascii-armor": "-----BEGIN PGP PUBLIC KEY BLOCK-----\n\nm....L\n-----END PGP PUBLIC KEY BLOCK-----\n",
-      "created-at": "2023-03-15T12:16:05Z",
-      "key-id": "F5....46",
-      "namespace": "<your-org>",
+      "ascii-armor": "-----BEGIN PGP PUBLIC KEY BLOCK-----\n\nmQGNBGXTY24BDADSXDCMGiR80JDrNfEua4/n=wVNT\n-----END PGP PUBLIC KEY BLOCK-----\n",
+      "created-at": "2024-02-19T14:27:43Z",
+      "key-id": "CB3AD3052843121E",
+      "namespace": "test",
       "source": "",
       "source-url": null,
       "trust-signature": "",
-      "updated-at": "2023-03-15T12:16:05Z"
+      "updated-at": "2024-02-19T14:27:43Z"
     },
     "links": {
-      "self": "/v2/gpg-keys/726"
+      "self": "/v2/gpg-keys/4"
     }
   }
 }
 ```
 
-Save the value of the `key-id`: `F5E1C817C4E028D4`
+Save the value of the `key-id`: `CB3AD3052843121E`
 
 - Create the payload file named `provider-payload.json`:
 ```
 {
-  "data": {
-    "type": "registry-providers",
-      "attributes": {
-      "name": "vra2",
-      "namespace": "<your-org>",
-      "registry-name": "private"
+    "data": {
+      "type": "registry-providers",
+        "attributes": {
+        "name": "oci",
+        "namespace": "test",
+        "registry-name": "private"
+      }
     }
   }
-}
 ```
 
-- Create the provider `vra2` in the private registry of Terraform Cloud
+- Create the provider `oci` in the private registry of Terraform Cloud/Enterprise
 ```shell
 curl -sS \
   --header "Authorization: Bearer $TOKEN" \
   --header "Content-Type: application/vnd.api+json" \
   --request POST \
   --data @provider-payload.json \
-  https://app.terraform.io/api/v2/organizations/daniela-org/registry-providers | jq '.'
+  https://tfe67.aws.munnep.com/api/v2/organizations/test/registry-providers | jq '.'
   ```
 
 - Create the payload file named `provider-version-payload.json` for the version:
@@ -217,24 +269,24 @@ curl -sS \
   --header "Content-Type: application/vnd.api+json" \
   --request POST \
   --data @provider-version-payload.json \
-  https://app.terraform.io/api/v2/organizations/<YOUR-TFC-ORG>/registry-providers/private/<YOUR-TFC-ORG>/vra2/versions | jq '.'
+  https://tfe67.aws.munnep.com/api/v2/organizations/test/registry-providers/private/test/oci/versions | jq '.'
 ```
 
 - Save your URLs for `shasums-upload` and `shasums-sig-upload`:
 ```
-    "links": {
-      "shasums-upload": "https://archivist.terraform.io/v1/object/dmF1bHQ6djI6KzNkOHN4dkxnMTNxbGF3bGM1QS9MTFh1RktkaDQ5THJIU3BxVmt4RFhCdTBpMklHeHBCRmRvUm1Hc3g1MFJISGtTcjBwQUlXYW9Wd2RCZjNscEpyc0NNQjlrTEliRXlXVnRtRlc2aGJORE14T3JmU1EvUVZCWHdjaFY3TU1zZFV2eEhqSTVLTVdIZ1UyWEw5cU1ZeVdnbHV5VXFvQk5rbGRMWUl6Y0JIMk9JbUpPZVhPb0RZVHB2Z3d5Y1JBRk5oQXdwTm93cUFHOENnSmhxQTJsMVhiMlRLdEZQbVNTYytJMzhYV3dpQk9wM3FFcVVGMEJLYXlqblVnQzF6aTJCcWZ5RDBxem5ubExNdk52YlB1aWd5NzFNSmlrQlA5czFnUUZIdUdUUnliK0k9",
-      "shasums-sig-upload": "https://archivist.terraform.io/v1/object/dmF1bHQ6djI6akFNeHJuZUM1eWM5dmhOWlNlK1RUV05xQmtEYklJQ0JmTHNxcWVGemg3WGV6TGlXRHZXT1dOMEJDUmRUYWQzQTBpbFptVWljTGxvRnJsUnZMdjNlTGwva2toYkRZVmlXWk1MV1FCaXJESlROSmU2elFHWkYwa2Z2UjFMQjBFbEdjdDM2MUJ1WFRqc0Z1eVBoZy92ek9jQ3dPQmhBTHJLVlQ5VE9DbElIcmFQa0VjQ0pPWmlVRkdsUDBLVGpOSExON2tmZ3h1dnVva0dhRU9XcHdKZzlSOUZQQjdDS1NLUEMxZEk1RHc0WjBhTDJwKzd2cUVWUUpLbUFGQzdnWWtGNFNpOGM5NzVBb0JaYmZRK1cxZ1NyWTl2aUQzWUJKQ1ZLMTA4RjdQeEVTQ29QaTMvcQ"
+     "shasums-upload": "https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6QmY0QWNxK25HcXFBT1ZWNzJDSGxFc3pFRmsrbG40QW9DR3htaHlQTnhhbHp1RUJWL0Jsb3MyanlEbGVlUmNEZ3UyemN5ZERJU0FkNnFBSjkwWWFzQVUrQjVhekhCVzdMSjU1QXBESzM1M3Q5UGc5NnRrTUZLbEhjYmpNcHEzdnVtS1EzRXVaZ1BnWHdaMTRKSDNmdDdIVmxiSFhaRWZwZGlVWnVvWjVHTEh1Z0xHdXBuR01nT01jSkc3blpwbEswcTROOTlSd3VRQU0ycTAzSnhZZk45Y2pBTGFXeGVabWRwY0s0MnQ5RnBFQVF2aTZZTFk4SWV6SFJIbW92OGZuYUVvRDBPRjBKQ2JwRk42c1JrSlAvaFdWdXd3cWFZV3RSUk1ENmJyOTlFbGs9",
+      "shasums-sig-upload": "https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6QTlBNTRVUDd2eXRlT0syeWZlNDBpZi9qdDlEdWxoN1lxdzhMc0JGcFE4cXFuNHhPanVZV1FZbzZESy9GWmQ3SFBuandOUVJ5eTFSOXhWZ3FjK1V4dHdGVjFGbDl1NHVYTzBMMzR6dnZZN0lXKzJ3LzRUdU9zYzZpbkZzOHBEZEM4czNDWEgwRXlTS3ZEb0ZTMys1V2FseGVHaVYwNHZHdFFwaGlYb2d6SWlRQThlUHcrRjFTRGM5Z0dEbWFpb0FldmNpd283MHFtQTNyVjBFUkp3WGduWXdtSEVnQVFZa3VBKytUeTVNV1p6cFFDSkRrSFg0MkxWVit0alpDd3E0Y3ZPZC90VnIvRVArUkF1cXhPU3lxOEIvd3pGOG8xbVFNZU44K3MraHlxaUUwT3ZIVA"
+   
 ```
 
 - Upload the `shasum` file to the URL:
 ```shell
-curl -T terraform-provider-vra2_0.7.1_SHA256SUMS https://archivist.terraform.io/v1/object/dmF1bHQ6djI6KzNkOHN4dkxnMTNxbGF3bGM1QS9MTFh1RktkaDQ5THJIU3BxVmt4RFhCdTBpMklHeHBCRmRvUm1Hc3g1MFJISGtTcjBwQUlXYW9Wd2RCZjNscEpyc0NNQjlrTEliRXlXVnRtRlc2aGJORE14T3JmU1EvUVZCWHdjaFY3TU1zZFV2eEhqSTVLTVdIZ1UyWEw5cU1ZeVdnbHV5VXFvQk5rbGRMWUl6Y0JIMk9JbUpPZVhPb0RZVHB2Z3d5Y1JBRk5oQXdwTm93cUFHOENnSmhxQTJsMVhiMlRLdEZQbVNTYytJMzhYV3dpQk9wM3FFcVVGMEJLYXlqblVnQzF6aTJCcWZ5RDBxem5ubExNdk52YlB1aWd5NzFNSmlrQlA5czFnUUZIdUdUUnliK0k9
+curl -T terraform-provider-oci_5.29.0_darwin_SHA256SUMS https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6QmY0QWNxK25HcXFBT1ZWNzJDSGxFc3pFRmsrbG40QW9DR3htaHlQTnhhbHp1RUJWL0Jsb3MyanlEbGVlUmNEZ3UyemN5ZERJU0FkNnFBSjkwWWFzQVUrQjVhekhCVzdMSjU1QXBESzM1M3Q5UGc5NnRrTUZLbEhjYmpNcHEzdnVtS1EzRXVaZ1BnWHdaMTRKSDNmdDdIVmxiSFhaRWZwZGlVWnVvWjVHTEh1Z0xHdXBuR01nT01jSkc3blpwbEswcTROOTlSd3VRQU0ycTAzSnhZZk45Y2pBTGFXeGVabWRwY0s0MnQ5RnBFQVF2aTZZTFk4SWV6SFJIbW92OGZuYUVvRDBPRjBKQ2JwRk42c1JrSlAvaFdWdXd3cWFZV3RSUk1ENmJyOTlFbGs9
 ```
 
 - Upload the `shasum sig` file to the URL:
 ```shell
-curl -T terraform-provider-vra2_0.7.1_SHA256SUMS.sig https://archivist.terraform.io/v1/object/dmF1bHQ6djI6akFNeHJuZUM1eWM5dmhOWlNlK1RUV05xQmtEYklJQ0JmTHNxcWVGemg3WGV6TGlXRHZXT1dOMEJDUmRUYWQzQTBpbFptVWljTGxvRnJsUnZMdjNlTGwva2toYkRZVmlXWk1MV1FCaXJESlROSmU2elFHWkYwa2Z2UjFMQjBFbEdjdDM2MUJ1WFRqc0Z1eVBoZy92ek9jQ3dPQmhBTHJLVlQ5VE9DbElIcmFQa0VjQ0pPWmlVRkdsUDBLVGpOSExON2tmZ3h1dnVva0dhRU9XcHdKZzlSOUZQQjdDS1NLUEMxZEk1RHc0WjBhTDJwKzd2cUVWUUpLbUFGQzdnWWtGNFNpOGM5NzVBb0JaYmZRK1cxZ1NyWTl2aUQzWUJKQ1ZLMTA4RjdQeEVTQ29QaTMvcQ
+curl -T terraform-provider-oci_5.29.0_darwin_SHA256SUMS.sig https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6QTlBNTRVUDd2eXRlT0syeWZlNDBpZi9qdDlEdWxoN1lxdzhMc0JGcFE4cXFuNHhPanVZV1FZbzZESy9GWmQ3SFBuandOUVJ5eTFSOXhWZ3FjK1V4dHdGVjFGbDl1NHVYTzBMMzR6dnZZN0lXKzJ3LzRUdU9zYzZpbkZzOHBEZEM4czNDWEgwRXlTS3ZEb0ZTMys1V2FseGVHaVYwNHZHdFFwaGlYb2d6SWlRQThlUHcrRjFTRGM5Z0dEbWFpb0FldmNpd283MHFtQTNyVjBFUkp3WGduWXdtSEVnQVFZa3VBKytUeTVNV1p6cFFDSkRrSFg0MkxWVit0alpDd3E0Y3ZPZC90VnIvRVArUkF1cXhPU3lxOEIvd3pGOG8xbVFNZU44K3MraHlxaUUwT3ZIVA
 ```
 
 - Create the payload file named `provider-version-payload-platform.json`:
@@ -259,18 +311,19 @@ curl -sS \
   --header "Content-Type: application/vnd.api+json" \
   --request POST \
   --data @provider-version-payload-platform.json \
-  https://app.terraform.io/api/v2/organizations/daniela-org/registry-providers/private/daniela-org/vra2/versions/0.7.1/platforms | jq '.'
+  https://tfe67.aws.munnep.com/api/v2/organizations/test/registry-providers/private/test/oci/versions/5.29.0/platforms | jq '.'
 ```
 
 - Save the value of the `provider-binary-upload` from the response:
 ```
- "provider-binary-upload": "https://archivist.terraform.io/v1/object/dmF1bHQ6djI6K2M3Tkp6c1VsazhncHhhRnhOcWdHTGFIMlAwWW9SVHc3MEV3YzllK1BpbzVydlZhdU5rT0hPVUF0N2J1YVhjbE84R0lRQWdkbEt6cmduL1JRaHErRXljZFp5dHdTTlRlL2c5NlVyVTBvM0xVdXJlTFg3UFdPMHh4bC9Tb1JYdXNjejdiTStIcGFaRXhTM1JwMEpFenVKcm9TenFyTzV1RENhSk03b3RxaHRRYURoV0duTjBHTEFMdG4vdDdRY0xvYnhxbEplcTF4WWg2Tjh1T2xiWHdxL2NZQjBjOE5tK2tKVUlSTEY4V0VwQXd0U3dOdWltZU5ZVVlYOW93aEE9PQ"
+      "provider-binary-upload": "https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6T2pvQmdJaFRlNWRxY08yTmJTR2JZbmdvOC9pbXQwWHRnNFhveGtJYmFZZG5iZjJrZUp6WVJ6dHMzdUZxZG9iSWMvTm1UYTBIOXVWOCs5UVhGNnlJRlVGUVhOQWhERUpPdTd2VTRiU1haazhqQUxnSGorVlhVOFlmL2dOUS8wQjVWNGNyYmVPRjZLZjBsZWw1T0xmVHZ1QjhPbitSbVF1b00yUWNEamtWa1BZTUtyM3RkMnozNkRhTGhYSUhzZGZ2bVdwYmNkR0FmYTJreFh3enFZN1Bkcy9tTVZZRjd4dFVpTFVIVStIMEVmSzR1RENFdS83U0Z1b3hRL2pIRFE9PQ"
+    }
     }
 ```
 
 - Upload the archived binary to the `provider-binary-upload` URL:
 ```shell
-curl -T terraform-provider-vra2_0.7.1_darwin_amd64.zip https://archivist.terraform.io/v1/object/dmF1bHQ6djI6K2M3Tkp6c1VsazhncHhhRnhOcWdHTGFIMlAwWW9SVHc3MEV3YzllK1BpbzVydlZhdU5rT0hPVUF0N2J1YVhjbE84R0lRQWdkbEt6cmduL1JRaHErRXljZFp5dHdTTlRlL2c5NlVyVTBvM0xVdXJlTFg3UFdPMHh4bC9Tb1JYdXNjejdiTStIcGFaRXhTM1JwMEpFenVKcm9TenFyTzV1RENhSk03b3RxaHRRYURoV0duTjBHTEFMdG4vdDdRY0xvYnhxbEplcTF4WWg2Tjh1T2xiWHdxL2NZQjBjOE5tK2tKVUlSTEY4V0VwQXd0U3dOdWltZU5ZVVlYOW93aEE9PQ
+curl -T terraform-provider-oci_5.29.0_darwin_amd64.zip https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6T2pvQmdJaFRlNWRxY08yTmJTR2JZbmdvOC9pbXQwWHRnNFhveGtJYmFZZG5iZjJrZUp6WVJ6dHMzdUZxZG9iSWMvTm1UYTBIOXVWOCs5UVhGNnlJRlVGUVhOQWhERUpPdTd2VTRiU1haazhqQUxnSGorVlhVOFlmL2dOUS8wQjVWNGNyYmVPRjZLZjBsZWw1T0xmVHZ1QjhPbitSbVF1b00yUWNEamtWa1BZTUtyM3RkMnozNkRhTGhYSUhzZGZ2bVdwYmNkR0FmYTJreFh3enFZN1Bkcy9tTVZZRjd4dFVpTFVIVStIMEVmSzR1RENFdS83U0Z1b3hRL2pIRFE9PQ
 ```
 
 - The `vra2` provider is now uploaded in the Terraform Cloud's private registry:
