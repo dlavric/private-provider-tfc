@@ -11,6 +11,10 @@ This repository has been created only for learning purposes and it is based on t
 
 All the commands have been executed on a **MacOS system**. For other operating systems, please adjust accordingly where needed.
 
+Please also note the following 2 KB articles 
+- [https://support.hashicorp.com/hc/en-us/articles/14522974687507-Upload-Provider-to-Private-Registry](https://support.hashicorp.com/hc/en-us/articles/14522974687507-Upload-Provider-to-Private-Registry)
+- [https://support.hashicorp.com/hc/en-us/articles/26638397057299-Error-Failed-to-install-provider-authentication-signature-from-unknown-issuer](https://support.hashicorp.com/hc/en-us/articles/26638397057299-Error-Failed-to-install-provider-authentication-signature-from-unknown-issuer)
+
 ### Prerequisites
 
 - [X] [Terraform](https://www.terraform.io/downloads)
