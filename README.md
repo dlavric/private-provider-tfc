@@ -380,3 +380,15 @@ If you ever set or change modules or backend configuration for Terraform,
 rerun this command to reinitialize your working directory. If you forget, other
 commands will detect it and remind you to do so if necessary.
 ```
+
+# Issues
+
+In this case the shasum files were not uploaded correctly. I removed the version and did those steps again. Removed the version with the following API call
+
+```
+curl \
+  --header "Authorization: Bearer $TOKEN" \
+  --header "Content-Type: application/vnd.api+json" \
+  --request DELETE \
+  https://app.terraform.io/api/v2/organizations/patrickmunne/registry-providers/private/patrickmunne/myprovider/versions/0.1.0
+```
