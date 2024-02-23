@@ -1,7 +1,7 @@
 # private-provider-tfc
 This is a test repository to add an existing public provider to the private registry of Terraform Cloud.
 
-The `vra` [public provider by Vmware](https://registry.terraform.io/providers/vmware/vra/latest/docs) will be added to the private registry of Terraform Cloud.
+The `oci` [public provider Oracle](https://registry.terraform.io/providers/oracle/oci/latest/docs) will be added to the private registry of Terraform Cloud
 
 **NOTE**: The exact same steps can be followed for a Terraform Enterprise installation.
 
@@ -30,34 +30,15 @@ cd private-provider-tfc
 
 ## Steps for preparing the new provider to be uploaded to the private registry of Terraform Cloud
 
-- Create a file `providers.tf` with the content of the provider that you want to download. In this case is going to be the [vra provider](https://registry.terraform.io/providers/vmware/vra/latest/docs):
+- Download the providers zipfiles you need from the github page of the provider. Please download the version for mac darwin and linux. We download both because we need to use the provider on our macbook and on Terraform Enterprise/Cloud and this requires the linux version of the provider
+https://github.com/oracle/terraform-provider-oci/releases/tag/v5.30.0
+
+- files should look like the following now
+
 ```
-terraform {
-  required_providers {
-    oci = {
-      source = "oracle/oci"
-      version = "5.29.0"
-    }
-  }
-}
-
-provider "oci" {
-  # Configuration options
-}
-``` 
-
-- Download the provider files to a directory on your local machine:
-```shell
-terraform providers mirror ./
-
-- Mirroring oracle/oci...
-  - Selected v5.29.0 to meet constraints 5.29.0
-  - Downloading package for darwin_amd64...
-  - Package authenticated: signed by a HashiCorp partner
+terraform-provider-oci_5.30.0_darwin_amd64.zip
+terraform-provider-oci_5.30.0_linux_amd64.zip
 ```
-
-Observe that a new folder named `registry.terraform.io` has been created and it contains the `oci` provider.
-
 - Install the `jq` package:
 ```shell
 brew install jq
@@ -128,49 +109,26 @@ sub   rsa3072 2024-02-19 [E]
 
 - Export the public gpg key:
 ```shell
-gpg -o gpg-key.pub -a --export patrick_oci@test_oci.com
-```
-
-- Unzip the provider file downloaded previously for MacOS:
-```shell
-cd registry.terraform.io/oracle/oci
-
-unzip terraform-provider-oci_5.29.0_darwin_amd64.zip
-```
-
-- Rename the extracted binary with the name you want to define for your private provider `oci`:
-```shell
-mv terraform-provider-oci_v5.29.0 ../../../
-```
-
-- Go back to the parent directory:
-```shell
-cd ../../../
-```
-
-- Create a zip file with the new provider `oci` binary:
-```shell
-zip terraform-provider-oci_5.29.0_darwin_amd64.zip terraform-provider-oci_v5.29.0
+gpg -o gpg-key.pub -a --export <key_id>
 ```
 
 - Create a file with the shasums for the binaries of the new provider `vra2` and the version 0.7.1:
 ```shell
-shasum -a 256 terraform-provider-oci_5.29.0_darwin_amd64.zip > terraform-provider-oci_5.29.0_darwin_SHA256SUMS
+shasum -a 256 terraform-provider-oci_5.30.0*.zip > terraform-provider-oci_5.30.SHA256SUMS
 ```
 
-Note that a file `terraform-provider-oci_5.29.0_darwin_SHA256SUMS` has been created 
+Note that a file `terraform-provider-oci_5.30.SHA256SUMS` has been created 
 
 - Create a detached signature using a gpg key:
 ```
-show your gpg keys
 gpg -k
 ```
-- use the one to use the signing
+- use the same signing key we used previously
 ```shell
-gpg  --default-key 121AD89CA07D84F400480621CB3AD3052843121E -sb terraform-provider-oci_5.29.0_darwin_SHA256SUMS
+gpg  --default-key 121AD89CA07D84F400480621CB3AD3052843121E -sb terraform-provider-oci_5.30.SHA256SUMS
 ```
 
-Note that a file `terraform-provider-oci_5.29.0_darwin_SHA256SUMS.sig` has been created 
+Note that a file `terraform-provider-oci_5.30.SHA256SUMS.sig` has been created 
 
 ## Steps to publish the provider to the private registry of Terraform Cloud
 
@@ -259,7 +217,7 @@ curl -sS \
   "data": {
     "type": "registry-provider-versions",
     "attributes": {
-      "version": "0.7.1",
+      "version": "5.30.0",
       "key-id": "<your-gpg-key-id>",
       "protocols": ["5.0"]
     }
@@ -279,34 +237,35 @@ curl -sS \
 
 - Save your URLs for `shasums-upload` and `shasums-sig-upload`:
 ```
-      "shasums-upload": "https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6T2ZQYS81bmNDczdnSytFRDhrdmhFbFhIbUd5a0Q1b1didVZBVlloUUlFZ0UwVzYvaDZpMWRvckVWREcrRGNXVFRWZTh5bFdKU2pucjhRQ3dDM0RVNDZhZnc2WXJkOFlGK2lYeHRBamtYY3hmQkNjZVFZMTRaQ3QxK1M2UnYvSUptc3pPTGJ3SVc5TURRWUxBRWN1RXZCeFNQNWRHRUMxbTNTWWp2ai93WXdveTh2ZWlnVDhJS2NzSnl3T085ekpEUGV5a25mNUVaTGdTbE01dDZDWktLYW81QU9BRUtiNGlna2o0bElIYkFEajJ1RWVOb21mR1BhZVpteUp6OEZOVTcyamNLUjNCdGJvS1NJUENuZVVUYmsycmVhUzNZajQvb0VKT1lMczc4YVE9",
-      "shasums-sig-upload": "https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6bUtTK2tZM0Q1ZXVFN3lUMzlZaFJHclQ5aVlYQ0VOYWdnbnBxMnBTZlFnaUd4TTVGVFhqSlVvMzBsMWQyVFFZTFFIQVNBeEtFQ2ROMVRDbDd1dVViWnQvc2ZPSkJBdHl0clFmS0YyRExzYndOdnlyRzgzQWl5dnRoK3JEbE81dGdXOHpmay9ueERwZWZzZVI0UlVvRGxNRnhnM21PSVVwTnFmWDN4b05YOUc5d2dxa0lxNUR3aERmUVRmUDlKenFrUVE4NFNkWDJaWEMyYW9VTWVyY1FuOGYxVCt2c3k0UklUTzl0c1FkcTExRnh6cnUyU0ZQdEEvZlBKaEZWclVXN0Q2ekRJM0wvcTQ0R1pZdVJuSVB6aTBPMit4cG1HMklYUG9JNldsQkRCZU52dEdvSA"
+      "shasums-upload": "https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6aHE2cHlaZ1BuSXQ3OUpuOU14OUhpcHd1NndBNzBtaGE1SStDRlBqVG1ReXlVdnVNUVppSVk2ZnhjSy8vUVRGMldmcGloakZKZFNuRWthUVpWZSt3WDU0V0dsa0I1cnU1NC9qT2tBZWZNamVWVHEyZ1ZGSFJndkFLS0w5MzlVbEpuVHBDSlA5dDR2alRXektSOWRrcG5Ydlk2SFhJUHNpRVQybW9WZWprYkNwM1c4Y3FMdnpCQnFCektVd1VhMlROVlVMb1pYL2VOQXg4QWFkNTkyNjlwTTUzS0lUR0Vld0Q2eHVMa3ZuTWU4VXNaQ3duT2Zob0IzSzZQaVFvYjN2L2txa200bHdmcjk2T093ei9Xd0JXaWZsWU00MXJCb2RKZ1JLeFJWcktKSGs9",
+      "shasums-sig-upload": "https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6VnEvMjU5VEFrRDJReWFReDdHbkJxSzJ0R3JaT3AxWWJZb2Fsa28vY2s2MlFjQ0R3U1ZhRXliNUp4RHFYVTdLdlcya2dXc1IwampWdkZXaXZkQm5OR0dnWThWK0RFYU9EbWNpZjhMN2Q4bEJoRHZYUkVEMjNkNHBCNlV0aU1jU3NPTGs5dDdjOEhmcWJzTFFHYVVITDRJYWFoS3FuWHNzcWVmc3JRZFJuQXkzYWtCQkxvQTVQTzBVbXRGSGtkRkVkQ201TGpick01STQycXhWV3pKbjJMQlZPcnM2Y1NqOFAyV1V6OHN5Vlh3NExpeEJjUDA2WkF5djc1dFJFR24xbFowK0Y2RFhTTDBLb2tnbjJ5Y3NhN2FLTXM5OVZUdEE3aUc4TXFsbU4yVElkYStMYg"
+    }
    
 ```
 
 - Upload the `shasum` file to the URL:
 ```shell
-curl -T terraform-provider-oci_5.29.0_darwin_SHA256SUMS https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6T2ZQYS81bmNDczdnSytFRDhrdmhFbFhIbUd5a0Q1b1didVZBVlloUUlFZ0UwVzYvaDZpMWRvckVWREcrRGNXVFRWZTh5bFdKU2pucjhRQ3dDM0RVNDZhZnc2WXJkOFlGK2lYeHRBamtYY3hmQkNjZVFZMTRaQ3QxK1M2UnYvSUptc3pPTGJ3SVc5TURRWUxBRWN1RXZCeFNQNWRHRUMxbTNTWWp2ai93WXdveTh2ZWlnVDhJS2NzSnl3T085ekpEUGV5a25mNUVaTGdTbE01dDZDWktLYW81QU9BRUtiNGlna2o0bElIYkFEajJ1RWVOb21mR1BhZVpteUp6OEZOVTcyamNLUjNCdGJvS1NJUENuZVVUYmsycmVhUzNZajQvb0VKT1lMczc4YVE9
+curl -T terraform-provider-oci_5.30.SHA256SUMS https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6bk1hdVZjRkNJU3hBT1VWR1YxWjJ4ajVEZThqeUh2ZjV1U3RvUnA3b1hXcVlaSjJNT3N1aHZ3bHZxeklYakIzN29QOGtkeXMwR2Z4RHRNWk5RV283bWMvUEkxSkJBbUUwYS9rbFRpL0VWYW9oRlJCaFBCdHhrUGJPbzNBVjBpZWxpV2YxQmE1bjRSdEk3TmJwczBJQWo1aTRDZkpUQUMxYy81V0ZqQlJnakxBQUY4Q3dXOTIrM0FNaTVYdmlPbEx4ZVNlMS9pc0xtWXgvRloyQVgyZFk2Y3FhVkZ1b3RZREtoaGJmeUtrMUI0ZnpuNVRsZ1EzOXlWQ0xLMHlsblh6MFczZng4WG40NFBWdU1Tc1FzbU8wWTNLb2Uwdk1YWTlqczEzR09ZTlhyLzg9
 ```
 
 - Upload the `shasum sig` file to the URL:
 ```shell
-curl -T terraform-provider-oci_5.29.0_darwin_SHA256SUMS.sig https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6bUtTK2tZM0Q1ZXVFN3lUMzlZaFJHclQ5aVlYQ0VOYWdnbnBxMnBTZlFnaUd4TTVGVFhqSlVvMzBsMWQyVFFZTFFIQVNBeEtFQ2ROMVRDbDd1dVViWnQvc2ZPSkJBdHl0clFmS0YyRExzYndOdnlyRzgzQWl5dnRoK3JEbE81dGdXOHpmay9ueERwZWZzZVI0UlVvRGxNRnhnM21PSVVwTnFmWDN4b05YOUc5d2dxa0lxNUR3aERmUVRmUDlKenFrUVE4NFNkWDJaWEMyYW9VTWVyY1FuOGYxVCt2c3k0UklUTzl0c1FkcTExRnh6cnUyU0ZQdEEvZlBKaEZWclVXN0Q2ekRJM0wvcTQ0R1pZdVJuSVB6aTBPMit4cG1HMklYUG9JNldsQkRCZU52dEdvSA
+curl -T terraform-provider-oci_5.30.SHA256SUMS.sig https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6cWxwRGpxVC8xTW41MllHNFQxb1NNTlN4ODNGVklPVFAxc3U3b3RBb3hoR2pPa3pIVXhFaG50dlBtTlVsZjZNMm5kbzVJYVpGcnVLNS9YSllGQXhPYTVnOFFKczRXYXh6NGxIQys3d1NDekNyZ3dZcUdoTE1QdS9MaVY5cHRBRkZpTWNTL1YzKzV2UlZURDJJUk5aVnJVNzVDcFE3b2N6Mk9MZlBpSGxpQXRwTlJJWWY3M3p5NDJLZGFOS2tnN29YSHBEd09aa3dONExFSGRUWFlUZGV5aHZ3Um5sVDZJVjNLa1BSMG5uUGI1aldVcERJdGQzUm1IT2UxQitZRmpIK21oeklMd0lDOG1pZVdJYUp3WllPRzVWamRyZmhnMUNxejhGUUF3OTE0S1o0dWVXTg
 ```
 
-- Create the payload file named `provider-version-payload-platform.json`:
+- Create the payload file named `provider-version-payload-platform_darwin.json`:
 ```
 {
-  "data": {
-    "type": "registry-provider-version-platforms",
-    "attributes": {
-      "os": "darwin",
-      "arch": "amd64",
-      "shasum": "<shasum of the binary archive terraform-provider-vra2_0.7.1_SHA256SUMS>",
-      "filename": "terraform-provider-vra2_0.7.1_darwin_amd64.zip"
+    "data": {
+      "type": "registry-provider-version-platforms",
+      "attributes": {
+        "os": "darwin",
+        "arch": "amd64",
+        "shasum": "6571b434d23467f0edb47724df445a0cf39bb5c39f3df4e77efad3b0eacd390e",
+        "filename": "terraform-provider-oci_5.30.0_darwin_amd64.zip"
+      }
     }
   }
-}
 ```
 
 - Create the provider version platform:
@@ -315,8 +274,8 @@ curl -sS \
   --header "Authorization: Bearer $TOKEN" \
   --header "Content-Type: application/vnd.api+json" \
   --request POST \
-  --data @provider-version-payload-platform.json \
-  https://tfe67.aws.munnep.com/api/v2/organizations/test/registry-providers/private/test/oci/versions/5.29.0/platforms | jq '.'
+  --data @provider-version-payload-platform_darwin.json \
+  https://tfe67.aws.munnep.com/api/v2/organizations/test/registry-providers/private/test/oci/versions/5.30.0/platforms | jq '.'
 ```
 
 - Save the value of the `provider-binary-upload` from the response:
@@ -329,6 +288,27 @@ curl -sS \
 ```shell
 curl -T terraform-provider-oci_5.29.0_darwin_amd64.zip https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6OTNwVU5aSloyamZMRDQyR2xrWk9qZUxCMm1NRFgrVmdUR2lhS1RIZGI1QzlyYXlvbGU1NlRGV0VPeG15SkxGY2F3akw5WnhMdXlZdlVYeXRzdUd5Qjhrc0xPNUdnaCs5MjhTenhUTDY4ZVRRRnkwaGV3ZEFvRlFHMkpIUS9ieTM5d3hvMXc5TVA5UmM1eDF4Q0FGYnh0RWkyZTNwK05sUUc3OGlibXJxQUxxRTJZSXpwWE9TdVY3bGJQRFJ4RnBPMjltSkpKbmV0SC9STTlPNjNMYTRmZVc1elFpWTJjNGhBdU9YRXZZbC8waEdJNUxnZlh1SnMzLzBmZGRsQWc9PQ
 ```
+- The provider for darwin is now uploaded. Do the same for linux
+- Create the provider version platform for linux
+```shell
+curl -sS \
+  --header "Authorization: Bearer $TOKEN" \
+  --header "Content-Type: application/vnd.api+json" \
+  --request POST \
+  --data @provider-version-payload-platform_linux.json \
+  https://tfe67.aws.munnep.com/api/v2/organizations/test/registry-providers/private/test/oci/versions/5.30.0/platforms | jq '.'
+```
+
+- Save the value of the `provider-binary-upload` from the response:
+```
+      "provider-binary-upload": "https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6OTNwVU5aSloyamZMRDQyR2xrWk9qZUxCMm1NRFgrVmdUR2lhS1RIZGI1QzlyYXlvbGU1NlRGV0VPeG15SkxGY2F3akw5WnhMdXlZdlVYeXRzdUd5Qjhrc0xPNUdnaCs5MjhTenhUTDY4ZVRRRnkwaGV3ZEFvRlFHMkpIUS9ieTM5d3hvMXc5TVA5UmM1eDF4Q0FGYnh0RWkyZTNwK05sUUc3OGlibXJxQUxxRTJZSXpwWE9TdVY3bGJQRFJ4RnBPMjltSkpKbmV0SC9STTlPNjNMYTRmZVc1elFpWTJjNGhBdU9YRXZZbC8waEdJNUxnZlh1SnMzLzBmZGRsQWc9PQ"
+    }
+```
+
+- Upload the archived binary to the `provider-binary-upload` URL:
+```shell
+curl -T terraform-provider-oci_5.30.0_linux_amd64.zip https://tfe67.aws.munnep.com/_archivist/v1/object/dmF1bHQ6djE6SVYvcUhJNG8rMlJTeEFYMy95NjRSR0FVdzNIbEtNdmNEVlFwaDM4bUVDRHoxdmdPUlRubXJQK3V6MG92QXNidFRqWTNLU2RZN3lYK0M0MEJuRmV0VjY1ajhPbDd2V2txN0VYSEg0d2dWY25oTjNTVVRNZklFTVhWWTRtUkxUV2lNUmxZcnJDeFdrNVd3VkJWUXhGRHg5dnV3OUYweGdkNDFuYmQrY0U0eVQ3MUhCRWtKc0k0anFJNFU0cnREdExyRzRDSWpGVmlqMFFsUjg3UmxBMXVCSmMrNElpZjNUQ1M2KzVVTkRRampCckI0azBvVXF2b2h5RE1aeXMwTlE9PQ
+```
 
 - The `oci` provider is now uploaded in the Terraform Cloud's private registry:
 
@@ -339,27 +319,30 @@ curl -T terraform-provider-oci_5.29.0_darwin_amd64.zip https://tfe67.aws.munnep.
 - Create a `main.tf` file locally with the following content:
 ```
 terraform {
+  required_providers {
+    oci = {
+      source  = "tfe67.aws.munnep.com/test/oci"
+      version = "5.30.0"
+    }
+  }
+
   cloud {
-    organization = "daniela-org"
+    hostname     = "tfe67.aws.munnep.com"
+    organization = "test"
 
     workspaces {
-      name = "vra2-private"
+      name = "oci_Test"
     }
   }
 }
 
-terraform {
-  required_providers {
-    vra2 = {
-      source = "app.terraform.io/daniela-org/vra2"
-      version = "0.7.1"
-    }
-  }
-}
 
-provider "vra2" { 
+
+
+provider "oci" {
   # Configuration options 
 }
+
 ```
 
 - Login to Terraform Cloud through your terminal:
@@ -367,16 +350,16 @@ provider "vra2" {
 terraform login
 ```
 
-- Initialize terraform to download the dependencies of the `vra2` private provider:
+- Initialize terraform to download the dependencies of the `oci` private provider:
 ```shell
 terraform init
 
-Initializing Terraform Cloud...
+Initializing the backend...
 
 Initializing provider plugins...
-- Finding app.terraform.io/daniela-org/vra2 versions matching "0.7.1"...
-- Installing app.terraform.io/daniela-org/vra2 v0.7.1...
-- Installed app.terraform.io/daniela-org/vra2 v0.7.1 (self-signed, key ID F5E1C817C4E028D4)
+- Finding tfe67.aws.munnep.com/test/oci versions matching "5.30.0"...
+- Installing tfe67.aws.munnep.com/test/oci v5.30.0...
+- Installed tfe67.aws.munnep.com/test/oci v5.30.0 (self-signed, key ID CB3AD3052843121E)
 
 Partner and community providers are signed by their developers.
 If you'd like to know more about provider signing, you can read about it here:
@@ -387,14 +370,13 @@ selections it made above. Include this file in your version control repository
 so that Terraform can guarantee to make the same selections by default when
 you run "terraform init" in the future.
 
-Terraform Cloud has been successfully initialized!
+Terraform has been successfully initialized!
 
-You may now begin working with Terraform Cloud. Try running "terraform plan" to
-see any changes that are required for your infrastructure.
+You may now begin working with Terraform. Try running "terraform plan" to see
+any changes that are required for your infrastructure. All Terraform commands
+should now work.
 
-If you ever set or change modules or Terraform Settings, run "terraform init"
-again to reinitialize your working directory.
+If you ever set or change modules or backend configuration for Terraform,
+rerun this command to reinitialize your working directory. If you forget, other
+commands will detect it and remind you to do so if necessary.
 ```
-
-
-
